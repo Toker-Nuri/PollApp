@@ -1,21 +1,15 @@
 import { Routes } from '@angular/router';
-import { Landingpage } from './pages/landingpage/landingpage';
-import { Newsurvey } from './pages/newsurvey/newsurvey';
-import path from 'path';
-import { Component } from '@angular/core';
-import { Survey } from './pages/survey/survey';
+import { LandingPage } from '../app/pages/landing-page/landing-page';
+import { SurveyPage } from '../app/pages/survey-page/survey-page'
+
 
 export const routes: Routes = [
-    {
-        path: "",
-        component: Landingpage,
-    },
-    {
-        path: "newsurvey",
-        component: Newsurvey,
-    },
-    {
-        path: "survey",
-        component: Survey,
-    }
+  {
+    path: '',
+    component: LandingPage,
+  },
+  {
+    path: 'survey/:id',
+    component: SurveyPage,
+  },
 ];
