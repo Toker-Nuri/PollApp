@@ -1,0 +1,42 @@
+@import '../../styles/abstracts/mixins';
+
+// Input cards
+.survey__input--card {
+  background-color: white;
+  border: none;
+  padding: 14px 8px;
+  border-radius: 0 15px 0 0;
+  height: 24px;
+  @include input-no-focus;
+  font-family: var(--font-text-bold);
+}
+
+.survey__textarea--card {
+  background-color: white;
+  border: none;
+  padding: 14px 8px;
+  border-radius: 0 25px 0 0;
+  min-height: 100px;
+  resize: none;
+  font-family: var(--font-text-bold);
+  @include input-no-focus;
+  @include thin-scrollbar;
+}
+
+.survey__input--standard-width {
+  width: 300px;
+}
+
+.survey__input--medium-width {
+  width: 250px;
+}
+
+.survey__input--small-width {
+  width: 150px;
+}
+
+@media(max-width: 900px) {
+   .survey__input--medium-width {
+    width: 100%;
+  }
+}

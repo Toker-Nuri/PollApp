@@ -1,0 +1,125 @@
+//Primary card on landing page
+.card-primary {
+  background-color: var(--color-bg-card-light);
+  font-family: var(--font-text-regular);
+  color: var(--color-purple-dark);
+  border-radius: 0 75px 0 0;
+  width: 300px;
+  height: 300px;
+  padding: 32px;
+  @include flex-column-space-btw;
+  cursor: pointer;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+
+  &:hover {
+    background-color: var(--color-bg-card-dark);
+
+    .card-primary__badge {
+      background-color: var(--color-orange-primary);
+    }
+  }
+
+  &__category {
+    font-family: var(--font-text-semibold);
+    font-size: var(--font-size-text-small);
+  }
+
+  &__title {
+    margin-top: 12px;
+    white-space: normal;
+    overflow: hidden;
+    display: block;
+  }
+
+  &__badge {
+    background-color: var(--color-orange-secondary);
+    font-family: var(--font-text-semibold);
+    font-size: 12px;
+    border-radius: 0 10px 0 0;
+    padding: 6px;
+    margin-top: 24px;
+    width: 120px;
+  }
+}
+
+//Card-secondary on landing page
+.card-secondary {
+  background-color: var(--color-bg-card-secondary);
+  cursor: pointer;
+  padding: 16px 20px;
+  border-radius: 0 65px 0 0;
+  height: 160px;
+  width: 100%;
+  max-width: 500px;
+  min-width: 400px;
+  @include flex-column-space-btw;
+  font-family: var(--font-text-regular);
+
+  &:hover {
+    background-color: var(--color-bg-card-secondary-hover);
+
+    .card-secondary__badge {
+      background-color: var(--color-orange-primary);
+    }
+  }
+
+  &__badge {
+    color: var(--color-purple-dark);
+    align-self: flex-end;
+    background-color: var(--color-orange-secondary);
+    font-family: var(--font-text-semibold);
+    font-size: 12px;
+    border-radius: 0 10px 0 0;
+    padding: 6px;
+    width: 120px;
+
+  }
+
+  &__category {
+    color: var(--color-orange-primary);
+  }
+
+  &__title {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    line-height: 1;
+  }
+}
+
+// Card survey-details page
+.card-primary-sd {
+  background-color: var(--color-bg-card-syrvey-details);
+  padding: 60px;
+  border-radius: 0 70px 0 0;
+}
+
+.badge {
+  background-color: var(--color-orange-primary);
+  font-family: var(--font-text-bold);
+  font-size: 16px;
+  border-radius: 0 10px 0 0;
+  padding: 6px;
+  margin-top: 24px;
+  width: 120px;
+}
+
+@media (max-width: 1000px) {
+  .card-secondary {
+    max-width: 700px;
+    min-width: 250px;
+  }
+}
+
+@media (max-width: 500px) {
+  .card-primary {
+    height: 200px;
+  }
+
+  .card-primary-sd {
+    padding: 20px 30px;
+  }
+}
