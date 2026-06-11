@@ -1,0 +1,135 @@
+<div class="container">
+  <header class="landing-header">
+    <img src="/assets/images/ui/logo_orange.svg" alt="the logo of the app" />
+  </header>
+
+  <main class="landing-page">
+    <!-- hero bereich oben -->
+    <section class="landing-page__hero">
+      <div class="landing-page__hero-left">
+        <h1 class="landing-page__title">Collect Feedback, <br />Unlock Ideas</h1>
+        <div class="landing-page__hero-right--mobile">
+          <div class="landing-page__visual">
+            <img
+              src="/assets/images/ui/visual_hero.png"
+              class="landing-page__visual-center"
+              alt="a drawing of a phone"
+            />
+            <img
+              src="/assets/images/ui/visual_hero_typing_bubble.svg"
+              class="landing-page__visual-icon landing-page__visual-icon--chat"
+              alt="a typing bubble"
+            />
+            <img
+              src="/assets/images/ui/visual_hero_questionmark.svg"
+              class="landing-page__visual-icon landing-page__visual-icon--question"
+              alt="a question mark"
+            />
+            <img
+              src="/assets/images/ui/visual_hero_check.svg"
+              class="landing-page__visual-icon landing-page__visual-icon--check"
+              alt="a checkmark"
+            />
+            <img
+              src="/assets/images/ui/visual_hero_star.svg"
+              class="landing-page__visual-icon landing-page__visual-icon--star"
+              alt="a star"
+            />
+          </div>
+        </div>
+        <p class="landing-page__subtitle">
+          Create and share surveys in minutes - from team events to workplace culture. Collect
+          opinions, engage your audience, and turn feedback into action.
+        </p>
+        <button class="btn btn--primary btn--icon-plus" (click)="openModal()">
+          New survey
+        </button>
+        <app-dialog [(open)]="modalOpen">
+          <app-survey-create-page (close)="modalOpen = false"></app-survey-create-page>
+        </app-dialog>
+      </div>
+      <div class="landing-page__hero-right">
+        <div class="landing-page__visual">
+          <img
+            src="/assets/images/ui/visual_hero.png"
+            class="landing-page__visual-center"
+            alt="a drawing of a phone"
+          />
+          <img
+            src="/assets/images/ui/visual_hero_typing_bubble.svg"
+            class="landing-page__visual-icon landing-page__visual-icon--chat"
+            alt="a typing bubble"
+          />
+          <img
+            src="/assets/images/ui/visual_hero_questionmark.svg"
+            class="landing-page__visual-icon landing-page__visual-icon--question"
+            alt="a question mark"
+          />
+          <img
+            src="/assets/images/ui/visual_hero_check.svg"
+            class="landing-page__visual-icon landing-page__visual-icon--check"
+            alt="a checkmark"
+          />
+          <img
+            src="/assets/images/ui/visual_hero_star.svg"
+            class="landing-page__visual-icon landing-page__visual-icon--star"
+            alt="a star"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- umfragen die bald ablaufen -->
+    <section class="landing-page__ending-soon centered-section section-spacing-vertical">
+      <h2 class="landing-page__section-title">Your surveys</h2>
+      <h3 class="landing-page__section-subtitle">Ending soon surveys</h3>
+      <app-survey-list
+        filter="ending-soon"
+        sort="soonest-first"
+        [secondaryStyle]="false"
+        [limit]="3"
+      ></app-survey-list>
+    </section>
+
+    <!-- aktive und vergangene umfragen mit filter -->
+    <section class="landing-page__filters centered-section section-spacing-vertical">
+      <div class="landing-page__filters-top">
+        <div class="landing-page__filters-left">
+          <button
+            class="btn-secondary"
+            [class.btn-secondary-active]="currentFilter === 'active'"
+            [class.btn-secondary-inactive]="currentFilter !== 'active'"
+            (click)="currentFilter = 'active'"
+          >
+            Active surveys
+          </button>
+
+          <button
+            class="btn-secondary"
+            [class.btn-secondary-active]="currentFilter === 'past'"
+            [class.btn-secondary-inactive]="currentFilter !== 'past'"
+            (click)="currentFilter = 'past'"
+          >
+            Past surveys
+          </button>
+        </div>
+
+        <div class="landing-page__filters-right">
+          <app-dropdown
+            label="Sort by category"
+            [options]="categories"
+            [(value)]="chosenCategory"
+          ></app-dropdown>
+        </div>
+      </div>
+      <!-- umfragenliste mit filtern -->
+      <app-survey-list
+        [filter]="currentFilter"
+        sort="soonest-first"
+        [secondaryStyle]="true"
+        [category]="chosenCategory"
+      >
+      </app-survey-list>
+    </section>
+  </main>
+</div>
