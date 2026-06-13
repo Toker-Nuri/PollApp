@@ -1,0 +1,21 @@
+<article class="question-item">
+  <h2 class="question-item__title">{{ question().order_index }}. {{ question().text }}</h2>
+
+  @if (multipleChoice()) {
+    <small class="question-item__multiple-info"> Multiple answers are possible. </small>
+  }
+
+  <div class="question-item__options">
+    @for (o of options(); track o.id) {
+      <app-option-item
+        class="question-item__option"
+        [option]="o"
+        [isPastSurvey]="isPastSurvey()"
+        [questionId]="question().id"
+        [isChecked]="selectedOptions().includes(o.id)"
+        (clicked)="optionClick($event)"
+      >
+      </app-option-item>
+    }
+  </div>
+</article>

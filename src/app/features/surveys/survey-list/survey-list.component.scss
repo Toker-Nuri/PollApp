@@ -1,0 +1,51 @@
+@import '../../../../styles/abstracts/mixins';
+
+h3 {
+  font-family: var(--font-text-medium);
+  font-size: var(--font-size-text-large);
+}
+
+.landing-page__ending-soon-cards {
+  @include flex-space-btw;
+  gap: 16px;
+  flex-wrap: nowrap;
+}
+
+.landing-page__active-cards {
+  @include grid-two-columns;
+}
+
+.no-surveys {
+  font-family: var(--font-text-regular);
+  font-size: var(--font-size-text-medium);
+}
+
+.survey-list-container {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  padding-bottom: 10px;
+  @include thin-scrollbar;
+}
+
+.survey-card {
+  flex: 0 0 auto;
+  width: 300px;
+}
+
+@media (max-width: 1000px) {
+  .landing-page__active-cards {
+    grid-template-columns: 1fr;
+    place-items: center;
+  }
+}
+
+@media (max-width: 500px) {
+  .survey-card {
+    flex: 0 0 auto;
+    width: 250px;
+  }
+}

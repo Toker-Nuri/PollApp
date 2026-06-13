@@ -1,0 +1,48 @@
+@import '../../../../styles/abstracts/mixins';
+
+.survey-detail {
+  height: 100%;
+  font-family: var(--font-text-regular);
+  font-size: var(--font-sizes-text-regular);
+  color: var(--color-purple-dark);
+}
+
+.survey-detail__header {
+  @include flex-column-space-btw;
+  gap: 20px;
+}
+
+.survey-detail__meta {
+  @include flex-space-btw;
+}
+
+.survey-detail__title {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h1);
+  color: var(--color-orange-primary);
+}
+
+.survey-detail__description {
+  padding: 20px 0;
+}
+
+.survey-detail__questions {
+  @include grid-two-columns;
+  padding-bottom: 20px;
+  gap: 32px;
+}
+
+@media (max-width: 850px) {
+  .survey-detail__questions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 550px) {
+  .survey-detail__meta {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}

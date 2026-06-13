@@ -1,0 +1,30 @@
+<section class="survey-detail">
+  <!-- umfrage header mit titel und metadaten -->
+  <article class="survey-detail__header">
+    <span class="badge">{{ getStatusText() }}</span>
+
+    <div class="survey-detail__meta">
+      <p class="survey-detail__meta-item">Ends on: {{ getEndDate() || "No end date" }}</p>
+      <p class="survey-detail__meta-item">Category: {{ survey()?.category }}</p>
+    </div>
+
+    <h2 class="survey-detail__title">{{ survey()?.title }}</h2>
+
+    <p class="survey-detail__description">
+      {{ survey()?.description }}
+    </p>
+  </article>
+
+  <!-- alle fragen der umfrage -->
+  <article class="survey-detail__questions">
+    @for (q of questions(); track q.id) {
+      <app-question-item
+        [isPastSurvey]="surveyEnded()"
+        class="survey-detail__question-item"
+        [question]="q"
+        (selectedChange)="selectionChanged.emit($event)"
+      >
+      </app-question-item>
+    }
+  </article>
+</section>
