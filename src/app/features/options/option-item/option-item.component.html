@@ -1,0 +1,13 @@
+<section class="option-item">
+  <ul class="option-item__list">
+    <li
+      class="option-item__entry"
+      [class.disabled]="isPastSurvey()"
+      (click)="!isPastSurvey() && onOptionClick(option().id)"
+    >
+      <span class="checkbox" [class.checkbox--checked]="isChecked()"></span>
+      <span class="option-item__index">{{ option().order_index }}.</span>
+      <span class="option-item__text">{{ option().text }}</span>
+    </li>
+  </ul>
+</section>
