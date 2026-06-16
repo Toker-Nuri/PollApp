@@ -11,7 +11,7 @@
       <p class="create-survey__badge badge">Draft</p>
       <header class="create-survey__header">
         <h1 class="create-survey__title">Create new survey</h1>
-        <button (click)="closeModal()" class="btn-quaternary create-survey__cancel-btn">
+        <button (click)="closeCreateSurveyModal()" class="btn-quaternary create-survey__cancel-btn">
           Cancel
           <svg class="icon icon--close" width="20" height="20" viewBox="0 0 24 24">
             <path
@@ -24,36 +24,35 @@
         </button>
       </header>
 
-      <!-- das hauptformular -->
-      <form class="create-survey__body" [formGroup]="myForm">
-        <!-- oberer bereich: umfrage infos -->
+      <form class="create-survey__body" [formGroup]="surveyForm">
+        <!-- UPPER CONTAINER -->
         <app-create-survey
-          (clearSurveyName)="clearTitle()"
-          (clearSurveyDatum)="clearDate()"
-          (clearSurveyDesctiption)="clearDesc()"
-          [titleControl]="nameControl"
-          [datumControl]="dateControl"
-          [descriptionControl]="infoControl"
-          [categoryControl]="catControl"
+          (clearSurveyName)="onClearSurveyName()"
+          (clearSurveyDatum)="onClearSurveyDatum()"
+          (clearSurveyDesctiption)="onClearSurveyDescription()"
+          [titleControl]="titleControl"
+          [datumControl]="datumControl"
+          [descriptionControl]="descriptionControl"
+          [categoryControl]="categoryControl"
           #createSurvey
         ></app-create-survey>
 
-        <!-- unterer bereich: fragen -->
+        <!-- LOWER CONTAINER -->
         <section class="create-survey__lower">
           <div class="create-survey__questions">
-            @for (q of questionsList.controls; track q; let i = $index) {
+            @for (q of questionsArr.controls; track q; let i = $index) {
               <div class="create-survey__question">
                 <app-create-question
                   [questionIndex]="i"
                   [questionGroup]="q"
-                  (addOption)="addNewOption(i)"
-                  (deleteOption)="removeOption(i, $event)"
-                  (deleteQuestion)="removeQuestion(i)"
+                  (addOption)="addOption(i)"
+                  (deleteOption)="deleteOption(i, $event)"
+                  (deleteQuestion)="deleteQuestion(i)"
                 ></app-create-question>
               </div>
             }
             <button
-              (click)="addNewQuestion()"
+              (click)="addQuestion()"
               type="button"
               class="btn-quaternary create-survey__add-question-btn"
             >
@@ -68,7 +67,7 @@
         </section>
       </form>
       <button
-        (click)="publishSurvey()"
+        (click)="submitSurvey()"
         class="create-survey__publish-btn btn btn-primary btn--icon-check"
       >
         Publish
@@ -76,22 +75,22 @@
     </section>
   </main>
 </div>
-<!-- ladeanimation overlay -->
-<section class="submitting-overlay" [class.submitting-overlay--open]="isSaving">
+<!-- Submitting Overlay -->
+<section class="submitting-overlay" [class.submitting-overlay--open]="isSubmittingSurvey">
   <div class="submitting-overlay__content">
     <p class="submitting-overlay__message">Submitting your survey…</p>
 
     <div class="spinner"></div>
   </div>
 </section>
-<!-- erfolgs-overlay nach dem speichern -->
-<section class="published-overlay" [class.published-overlay--open]="showPublished">
+<!-- Published Overlay -->
+<section class="published-overlay" [class.published-overlay--open]="isPublishedOverlayOpen">
   <div class="published-overlay__content">
     <p class="published-overlay__message">Your survey is now published</p>
 
     <button
       class="published-overlay__close-btn"
-      (click)="closeDoneScreen()"
+      (click)="closePublishedOverlay()"
       aria-label="Close"
     >
       <svg class="published-overlay__close-icon" width="20" height="20" viewBox="0 0 13 13">

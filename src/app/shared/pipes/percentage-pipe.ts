@@ -1,22 +1,28 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-// diese pipe wandelt eine zahl in einen prozentwert um
-// zum beispiel: 75 wird zu "75%"
+/**
+ * Formats a number as a percentage string.
+ * Rounds the value to the given number of decimals.
+ *
+ * Usage:
+ * {{ value | percentage }}
+ * {{ value | percentage:1 }}
+ *
+ * Notes:
+ * - Returns "0%" when the value is null or undefined.
+ * - Does not multiply by 100; expects the input to already be a percentage value.
+ */
 @Pipe({
   name: 'percentage',
   standalone: true,
 })
 export class PercentagePipe implements PipeTransform {
   transform(value: number, decimals: number = 0): string {
-    // wenn kein wert da ist einfach 0% zurueckgeben
     if (value === null || value === undefined) {
       return '0%';
     }
-
-    // wir runden den wert auf die gewuenschten dezimalstellen
-    var factor = Math.pow(10, decimals);
-    var rounded = Math.round(value * factor) / factor;
-
+    const factor = Math.pow(10, decimals);
+    const rounded = Math.round(value * factor) / factor;
     return `${rounded}%`;
   }
 }

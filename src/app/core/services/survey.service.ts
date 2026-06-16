@@ -3,73 +3,78 @@ import { Survey } from '../interfaces/survey.interface';
 import { supabase } from './supabase.client';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
-// dieser service ist zustaendig fuer alle umfragen
-// hier laden und speichern wir umfragen
+/**
+ * Service for working with surveys.
+ * This handles loading all surveys, loading one survey,
+ * and adding new surveys to Supabase.
+ *
+ * The service also keeps two signals:
+ * - surveys: the full list of surveys
+ * - singleSurvey: one survey used on the details page
+ *
+ * The service loads all surveys automatically when the app starts.
+ */
 
 @Injectable({
   providedIn: 'root',
 })
 export class SurveyService {
-  // hier speichern wir alle umfragen
-  surveys = signal<any[]>([]);
-  // die aktuell geoeffnete umfrage
-  currentSurvey = signal<Survey | null>(null);
+  surveys = signal<Survey[]>([]);
+  singleSurvey = signal<Survey | null>(null);
   surveyChannel: RealtimeChannel | null = null;
 
   constructor() {
-    // beim start alle umfragen laden
-    this.loadSurveys();
+    this.getAllSurveys();
   }
 
-  // alle umfragen aus der datenbank holen
-  async loadSurveys() {
+  /**
+   * Loads all surveys from Supabase.
+   * Updates the `surveys` signal with the result.
+   * Logs any errors to the console.
+   */
+  async getAllSurveys() {
     try {
-      var result = await supabase.from('surveys').select('*');
-      var data = result.data;
-      var error = result.error;
-
-      if (error) {
-        console.log('Fehler beim laden der umfragen:', error);
-      }
-
-      if (data == null) {
-        data = [];
-      }
-
-      this.surveys.set(data);
+      let { data: surveys, error } = await supabase.from('surveys').select('*');
+      if (error) console.error('Supabase error at getAllSurveys:', error);
+      this.surveys.set(surveys ?? ([] as Survey[]));
     } catch (err) {
-      console.log('unerwarteter fehler in loadSurveys', err);
+      console.error('Unexpected JS runtime error at getAllSurveys', err);
     }
   }
 
-  // eine einzelne umfrage anhand der id laden
-  async loadOneSurvey(id: string) {
+  /**
+   * Loads a single survey by its ID.
+   * Updates the `singleSurvey` signal so the details page can use it.
+   *
+   * @param id - The ID of the survey to load.
+   * @returns The survey data or null if something failed.
+   */
+  async getSingleSurvey(id: string) {
     try {
-      var result = await supabase
+      let { data: surveys, error } = await supabase
         .from('surveys')
         .select('*')
         .eq('id', id)
         .single();
-
-      var data = result.data;
-      var error = result.error;
-
-      if (error) {
-        console.log('Fehler beim laden der umfrage:', error);
-      }
-
-      this.currentSurvey.set(data);
-      return data;
+      if (error) console.error('Supabase error at getSingleSurvey:', error);
+      this.singleSurvey.set(surveys);
+      return surveys;
     } catch (err) {
-      console.log('unerwarteter fehler in loadOneSurvey:', err);
+      console.error('Unexpected JS runtime error in getSingleSurvey:', err);
       return null;
     }
   }
 
-  // neue umfrage in der datenbank speichern
-  async saveSurvey(survey: any) {
+  /**
+   * Inserts a new survey into Supabase.
+   * Only the needed fields are sent to the database.
+   *
+   * @param survey - The form data from the create-survey page.
+   * @returns The newly created survey or undefined if something failed.
+   */
+  async insertSurvey(survey: any) {
     try {
-      var result = await supabase
+      const { data, error } = await supabase
         .from('surveys')
         .insert({
           title: survey.title,
@@ -79,19 +84,13 @@ export class SurveyService {
           is_published: survey.is_published,
         })
         .select();
-
-      var data = result.data;
-      var error = result.error;
-
       if (error) {
-        console.log('Fehler beim speichern der umfrage:', error);
+        console.error('Supabase error at insertSurvey:', error);
         return;
       }
-
-      console.log('umfrage gespeichert!');
       return data?.[0];
     } catch (err) {
-      console.log('unerwarteter fehler in saveSurvey:', err);
+      console.error('Unexpected JS runtime error at insertSurvey:', err);
     }
   }
 }

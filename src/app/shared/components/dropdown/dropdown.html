@@ -2,8 +2,8 @@
   <button
     type="button"
     class="btn-tertiary dropdown__trigger"
-    (click)="onButtonClick($event)"
-    [class.open]="isOpen"
+    (click)="onTriggerClick($event)"
+    [class.open]="isCategoriesOpen"
   >
     <span class="dropdown__label">{{ label() }}</span>
 
@@ -14,10 +14,9 @@
     </svg>
   </button>
   <span class="dropdown__selected-category">{{ value() }}</span>
-  <!-- liste mit allen optionen -->
-  <ul class="dropdown" [class.dropdown--open]="isOpen">
+  <ul class="dropdown" [class.dropdown--open]="isCategoriesOpen">
     @for (o of options(); track o) {
-      <li class="dropdown__item" (click)="choose(o)">
+      <li class="dropdown__item" (click)="select(o)">
         {{ o }}
       </li>
     }

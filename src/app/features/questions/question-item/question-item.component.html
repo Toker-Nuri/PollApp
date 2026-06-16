@@ -1,7 +1,7 @@
 <article class="question-item">
   <h2 class="question-item__title">{{ question().order_index }}. {{ question().text }}</h2>
 
-  @if (multipleChoice()) {
+  @if (isMultipleAllowed()) {
     <small class="question-item__multiple-info"> Multiple answers are possible. </small>
   }
 
@@ -13,7 +13,7 @@
         [isPastSurvey]="isPastSurvey()"
         [questionId]="question().id"
         [isChecked]="selectedOptions().includes(o.id)"
-        (clicked)="optionClick($event)"
+        (clicked)="onOptionClicked($event)"
       >
       </app-option-item>
     }

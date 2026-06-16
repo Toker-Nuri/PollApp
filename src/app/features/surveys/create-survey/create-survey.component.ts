@@ -4,8 +4,26 @@ import { DeleteBtn } from '../../../shared/components/delete-btn/delete-btn';
 import { SURVEY_CATEGORIES } from '../../../shared/constants/survey-categories';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
-// hier wird das formular fuer eine neue umfrage angezeigt
-// titel beschreibung datum und kategorie
+/**
+ * Handles the UI for creating the basic survey information:
+ * title, description, end date, and category.
+ *
+ * Inputs:
+ * - titleControl: FormControl for the survey title.
+ * - datumControl: FormControl for the survey end date.
+ * - descriptionControl: FormControl for the survey description.
+ * - categoryControl: FormControl for the survey category.
+ *
+ * Outputs:
+ * - clearSurveyName: Fired when the user clears the title field.
+ * - clearSurveyDatum: Fired when the user clears the date field.
+ * - clearSurveyDesctiption: Fired when the user clears the description field.
+ *
+ * Notes:
+ * - Tracks validation errors for title and category.
+ * - Does not save anything to the database.
+ * - Only manages form controls and UI state.
+ */
 @Component({
   selector: 'app-create-survey',
   imports: [Dropdown, DeleteBtn, ReactiveFormsModule],
@@ -15,11 +33,9 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 export class CreateSurvey {
   categories = SURVEY_CATEGORIES;
   selectedCategory: string | null = null;
-  isVisible: boolean = false; // zeigt titelfehlermeldung an
-  categoryErrorVisible: boolean = false; // zeigt kategoriefehler an
-  today = new Date().toISOString().split('T')[0]; // heutiges datum fuer min-datum
-
-  // formcontrols vom parent
+  isVisible: boolean = false;
+  categoryErrorVisible: boolean = false;
+  today = new Date().toISOString().split('T')[0];
   categoryControl = input<FormControl>();
   clearSurveyName = output<void>();
   titleControl = input.required<FormControl>();
@@ -28,35 +44,48 @@ export class CreateSurvey {
   clearSurveyDesctiption = output<void>();
   descriptionControl = input.required<FormControl>();
 
-  // fehler fuer das titelfeld zeigen oder verstecken
-  checkTitle() {
-    var control = this.titleControl();
+  /**
+   * Shows or hides the error message for the title field.
+   * Called when the user types or leaves the input.
+   */
+  showErrorMsg() {
+    const control = this.titleControl();
     this.isVisible = !control?.value?.trim();
   }
 
-  // titelfehler zuruecksetzen
-  clearTitleError() {
+  /**
+   * Resets the title error state.
+   * Called when the title field is cleared.
+   */
+  resetSurveyNameErr() {
     this.isVisible = false;
   }
 
-  // kategorie zuruecksetzen
-  clearCat() {
+  /**
+   * Resets the selected category and hides the category error.
+   */
+  resetCategory() {
     this.selectedCategory = '';
     this.categoryErrorVisible = false;
   }
 
-  // wenn eine kategorie ausgewaehlt wurde
-  categoryPicked(value: string | null) {
+  /**
+   * Updates the selected category and hides the error if a value is chosen.
+   */
+  onCategorySelected(value: string | null) {
     this.selectedCategory = value;
     if (value) {
       this.categoryErrorVisible = false;
     }
   }
 
-  // alle fehler auf einmal anzeigen (beim absenden)
-  showErrors() {
-    var title = this.titleControl();
-    var category = this.categoryControl();
+  /**
+   * Validates all fields at once.
+   * Used when the user tries to submit the survey.
+   */
+  showAllErrors() {
+    const title = this.titleControl();
+    const category = this.categoryControl();
     this.isVisible = !title?.value?.trim();
     this.categoryErrorVisible = !category?.value?.trim();
   }

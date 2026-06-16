@@ -1,10 +1,21 @@
-// das hier ist das datenmodell fuer eine umfrage
+/**
+ * Basic info about a survey.
+ * This is what we show in the survey list and on the details page.
+ *
+ * @property id - The survey's unique ID.
+ * @property created_at - When the survey was created.
+ * @property title - The main title shown to users.
+ * @property description - A short explanation of what the survey is about.
+ * @property category - Used to group or filter surveys.
+ * @property end_date - The date when the survey stops accepting votes.
+ * @property is_published - If true, the survey is visible to users.
+ */
 export interface Survey {
   id: string;
-  created_at: string; // wann wurde sie erstellt
-  title: string; // der titel der umfrage
+  created_at: string;
+  title: string;
   description: string;
-  category: string; // die kategorie
-  end_date: string; // bis wann laeuft die umfrage
-  is_published: boolean; // true = sichtbar fuer alle
+  category: string;
+  end_date: string;
+  is_published: boolean;
 }

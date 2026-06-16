@@ -1,17 +1,16 @@
 <section class="create-survey__add-option">
-  <!-- alle antwortfelder anzeigen -->
   @for (o of options()?.controls; track o; let i = $index) {
     <div class="create-survey__option">
       <div class="create-survey__option-row">
-        <span class="create-survey__option-label">{{ toLetter(i) }}.</span>
+        <span class="create-survey__option-label">{{ getLetter(i) }}.</span>
         <input
           type="text"
           class="survey__input--medium-width survey__input--card"
-          [formControl]="getOptionText(o)"
-          (blur)="checkOption(i)"
-          (input)="checkOption(i)"
+          [formControl]="getTextControl(o)"
+          (blur)="showErrorMsg(i)"
+          (input)="showErrorMsg(i)"
         />
-        <app-delete-btn (delete)="removeAnswer(i)"></app-delete-btn>
+        <app-delete-btn (delete)="onDeleteOption(i)"></app-delete-btn>
       </div>
       <p class="error_msg" [class.error_msg--visible]="optionErrors[i]">
         This field cannot be empty!

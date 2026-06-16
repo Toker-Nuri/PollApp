@@ -8,9 +8,19 @@ import { QuestionService } from '../../core/services/question.service';
 import { SurveyService } from '../../core/services/survey.service';
 import { Dialog } from '../../shared/components/dialog/dialog';
 import { SurveyCreatePage } from '../survey-create/survey-create-page';
+import lo from '@angular/common/locales/extra/lo';
 
-// die detailseite einer einzelnen umfrage
-// hier kann man abstimmen und ergebnisse sehen
+/**
+ * The main container for displaying a full, detailed survey.
+ * Loads questions, options, and votes for the selected survey.
+ * Handles answer selection, vote submission, and showing results.
+ *
+ * Notes:
+ * - Loads all survey data on init.
+ * - Computes whether the survey is expired.
+ * - Collects selected answers and submits them at once.
+ * - Controls the mobile results panel and the create-survey modal.
+ */
 @Component({
   selector: 'app-survey-page',
   imports: [SurveyDetail, RouterLink, VoteResults, Dialog, SurveyCreatePage],
@@ -24,108 +34,118 @@ export class SurveyPage {
   voteService = inject(VoteService);
   surveyService = inject(SurveyService);
   router = inject(Router);
-
-  // referenzen auf die signale aus den services
   questions = this.questionService.questions;
   options = this.optionService.options;
   votes = this.voteService.votes;
+  isPastSurvey: boolean = false;
+  isCreateSurveyOpen: boolean = false;
+  showResultsMobile: boolean = true;
+  userHasVoted:boolean = false;
+  // Stores selected answers in the voting process: questionId → optionIds[]
+  answers = new Map<string, string[]>();
 
-  surveyEnded: boolean = false; // ist die umfrage abgelaufen?
-  modalOpen: boolean = false; // ist das erstellen-modal offen?
-  showResults: boolean = true; // ergebnisse auf mobil anzeigen?
-  alreadyVoted: boolean = false; // hat der user schon gestimmt?
-
-  // hier speichern wir was der user ausgewaehlt hat
-  // key = frageId, value = liste von antwort-ids
-  selectedAnswers = new Map<string, string[]>();
-
-  // beim laden der seite alle daten holen
+  /**
+   * Loads all questions, options, and votes for this survey.
+   */
   async ngOnInit() {
-    var surveyId = this.route.snapshot.paramMap.get('id')!;
-    await this.questionService.loadQuestions(surveyId);
-    await this.optionService.loadAllOptions(surveyId);
-    await this.voteService.loadVotes(surveyId);
-
-    // pruefen ob der user bereits abgestimmt hat
-    this.alreadyVoted = localStorage.getItem(`survey_voted_${surveyId}`) === 'true';
+    const surveyId = this.route.snapshot.paramMap.get('id')!;
+    await this.questionService.getQuestionsForSurvey(surveyId);
+    await this.optionService.getOptionsForSurvey(surveyId);
+    await this.voteService.getVotesForSurvey(surveyId);
+    this.userHasVoted = localStorage.getItem(`survey_voted_${surveyId}`) === "true";
   }
 
-  // nach dem laden der view die umfrage holen und pruefen ob abgelaufen
+  /**
+   * Loads the survey after the view is ready and computes
+   * whether the survey is already expired.
+   */
   async ngAfterViewInit() {
-    var surveyId = this.route.snapshot.paramMap.get('id')!;
-    var survey = await this.surveyService.loadOneSurvey(surveyId);
-
+    const surveyId = this.route.snapshot.paramMap.get('id')!;
+    const survey = await this.surveyService.getSingleSurvey(surveyId);
     if (survey) {
       setTimeout(() => {
-        this.checkIfEnded(survey.end_date);
+        this.computeIsPast(survey.end_date);
       });
     }
   }
 
-  // pruefen ob das enddatum in der vergangenheit liegt
-  private checkIfEnded(endDate: string) {
+  /**
+   * Checks if the survey end date is before today.
+   * Used to disable voting on expired surveys.
+   */
+  private computeIsPast(endDate: string) {
     if (!endDate) {
-      this.surveyEnded = false;
+      this.isPastSurvey = false;
       return;
     }
-
-    var today = new Date();
+    const today = new Date();
     today.setHours(0, 0, 0, 0);
-
-    var end = new Date(endDate);
+    const end = new Date(endDate);
     end.setHours(0, 0, 0, 0);
-
-    this.surveyEnded = end < today;
+    this.isPastSurvey = end < today;
   }
 
-  // antworten fuer eine bestimmte frage zurueckgeben
-  getOptionsForQ(qId: number | string) {
+  /**
+   * Returns all options that belong to a specific question.
+   */
+  optionsForQuestion(qId: number | string) {
     return this.options().filter((o) => o.question_id === qId);
   }
 
-  // stimmen fuer eine bestimmte frage zurueckgeben
-  getVotesForQ(qId: number | string) {
+  /**
+   * Returns all votes that belong to a specific question.
+   */
+  votesForQuestion(qId: number | string) {
     return this.votes().filter((v) => v.question_id === qId);
   }
 
-  // gibt es irgendwelche stimmen in der datenbank?
-  hasAnyVotes() {
+  /**
+   * Returns true if the survey has at least one vote.
+   */
+  hasVotes() {
     return this.votes().length > 0;
   }
 
-  // hat der user lokal schon etwas ausgewaehlt?
-  hasLocalAnswers() {
-    for (var optionIds of this.selectedAnswers.values()) {
-      if (optionIds.length > 0) {
-        return true;
-      }
+  /**
+   * Checks whether the user has selected any answers locally.
+   * Used to show live vote results before the survey is submitted.
+   *
+   * Returns true if at least one question contains one or more
+   * locally selected option IDs.
+   */
+  hasLocalVotes() {
+    for (const optionIds of this.answers.values()) {
+      if (optionIds.length > 0) return true;
     }
     return false;
   }
 
-  // alle antworten in die datenbank speichern und weiterleiten
-  async submitAnswers() {
-    for (var [questionId, optionIds] of this.selectedAnswers.entries()) {
+  /**
+   * Submits all selected answers to the database.
+   * Called when the user clicks "Submit survey".
+   */
+  async completeSurvey() {
+    for (const [questionId, optionIds] of this.answers.entries()) {
       if (optionIds.length > 0) {
-        await this.voteService.saveVote(questionId, optionIds);
+        await this.voteService.insertVote(questionId, optionIds);
       }
     }
-
-    // merken dass der user abgestimmt hat
-    var surveyId = this.route.snapshot.paramMap.get('id')!;
+    const surveyId = this.route.snapshot.paramMap.get('id')!;
     localStorage.setItem(`survey_voted_${surveyId}`, 'true');
-
-    // zur startseite zurueck navigieren
     this.router.navigate(['/']);
   }
 
-  // wenn der user eine antwort auswaehlt speichern wir das hier
-  onAnswerChanged(event: { questionId: string; optionIds: string[] }) {
-    this.selectedAnswers.set(event.questionId, event.optionIds);
+  /**
+   * Updates the stored answers when a question selection changes.
+   */
+  onSelectionChanged(event: { questionId: string; optionIds: string[] }) {
+    this.answers.set(event.questionId, event.optionIds);
   }
 
-  // das erstellen-modal oeffnen
-  openModal() {
-    this.modalOpen = true;
+  /**
+   * Opens the modal for creating a new survey.
+   */
+  openCreateSurveyModal() {
+    this.isCreateSurveyOpen = true;
   }
 }

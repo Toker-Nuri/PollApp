@@ -6,18 +6,17 @@
   <input
     type="text"
     class="survey__input--standard-width survey__input--card"
-    (blur)="checkQuestion()"
-    (input)="checkQuestion()"
-    [formControl]="getTextField()"
+    (blur)="showErrorMsg()"
+    (input)="showErrorMsg()"
+    [formControl]="getTextControl()"
   />
-  <p class="error_msg" [class.error_msg--visible]="errorVisible">This field cannot be empty!</p>
+  <p class="error_msg" [class.error_msg--visible]="isVisible">This field cannot be empty!</p>
 </section>
-<!-- antworten fuer diese frage -->
 <section class="create-survey__answers">
   <div class="create-survey__allow-multiple">
     <label class="create-survey__label">Answers</label>
     <label class="create-survey__checkbox">
-      <input type="checkbox" [formControl]="multipleControl" />
+      <input type="checkbox" [formControl]="multipleAnswerControl" />
       Allow multiple answers.
     </label>
   </div>

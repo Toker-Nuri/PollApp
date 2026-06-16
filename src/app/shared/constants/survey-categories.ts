@@ -1,4 +1,7 @@
-// alle moeglichen kategorien fuer umfragen
+/**
+ * List of all available survey categories.
+ * Used in dropdowns and forms when creating a survey.
+ */
 export const SURVEY_CATEGORIES = [
   'Team activities',
   'Health & Wellness',

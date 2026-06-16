@@ -3,44 +3,49 @@ import { Question } from '../interfaces/question.interface';
 import { supabase } from './supabase.client';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
-// dieser service laedt und speichert fragen
+/**
+ * Service for working with questions inside a survey.
+ * Stores all loaded questions in a signal and provides
+ * functions for loading and inserting questions.
+ */
+
 @Injectable({
   providedIn: 'root',
 })
 export class QuestionService {
-  // alle fragen fuer die aktuelle umfrage
-  questions = signal<any[]>([]);
+  questions = signal<Question[]>([]);
   questionChannel: RealtimeChannel | null = null;
 
-  // fragen fuer eine bestimmte umfrage laden
-  async loadQuestions(surveyId: string) {
+  /**
+   * Loads all questions that belong to a specific survey.
+   * Updates the `questions` signal with the result.
+   *
+   * @param surveyId - The ID of the survey to load questions for.
+   */
+  async getQuestionsForSurvey(surveyId: string) {
     try {
-      var result = await supabase
+      let { data: questions, error } = await supabase
         .from('questions')
         .select('*')
         .eq('survey_id', surveyId);
-
-      var data = result.data;
-      var error = result.error;
-
-      if (error) {
-        console.log('fehler beim laden der fragen:', error);
-      }
-
-      if (data == null) {
-        data = [];
-      }
-
-      this.questions.set(data);
+      if (error) console.error('getQuestionsForSurvey error:', error);
+      this.questions.set(questions ?? ([] as Question[]));
     } catch (err) {
-      console.log('unerwarteter fehler in loadQuestions', err);
+      console.error('Unexpected error in getQuestionsForSurvey', err);
     }
   }
 
-  // eine neue frage speichern
-  async saveQuestion(question: any, surveyId: number) {
+  /**
+   * Inserts a new question into Supabase.
+   * The question is linked to a survey using the surveyId.
+   *
+   * @param question - The form data for the new question.
+   * @param surveyId - The ID of the survey this question belongs to.
+   * @returns The newly created question or undefined if something failed.
+   */
+  async insertQuestion(question: any, surveyId: number) {
     try {
-      var result = await supabase
+      const { data, error } = await supabase
         .from('questions')
         .insert({
           survey_id: surveyId,
@@ -49,17 +54,12 @@ export class QuestionService {
           allow_multiple: question.allow_multiple,
         })
         .select();
-
-      var data = result.data;
-      var error = result.error;
-
       if (error) {
-        console.log('fehler beim speichern der frage:', error);
+        console.error('Supabase error at insertQuestion:', error);
       }
-
       return data?.[0];
     } catch (err) {
-      console.log('unerwarteter fehler in saveQuestion:', err);
+      console.error('Unexpected JS runtime error insertQuestion:', err);
     }
   }
 }

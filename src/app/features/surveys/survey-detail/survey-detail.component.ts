@@ -4,8 +4,20 @@ import { ActivatedRoute } from '@angular/router';
 import { QuestionService } from '../../../core/services/question.service';
 import { QuestionItem } from '../../questions/question-item/question-item.component';
 
-// zeigt die details einer einzelnen umfrage an
-// laedt umfrage und fragen beim start
+/**
+ * Displays the full details of a single survey.
+ * Loads the survey data and its questions based on the route ID.
+ *
+ * Inputs:
+ * - isPastSurvey: If true, the survey is read‑only and cannot be answered.
+ *
+ * Outputs:
+ * - selectionChanged: Emits the selected option IDs for each question.
+ *
+ * Notes:
+ * - Loads survey details and questions on init.
+ * - Uses signals from SurveyService and QuestionService for reactive updates.
+ */
 @Component({
   selector: 'app-survey-detail',
   imports: [QuestionItem],
@@ -15,39 +27,40 @@ import { QuestionItem } from '../../questions/question-item/question-item.compon
 export class SurveyDetail {
   surveyService = inject(SurveyService);
   questionService = inject(QuestionService);
-  survey = this.surveyService.currentSurvey; // die aktuelle umfrage
-  questions = this.questionService.questions; // alle fragen dazu
+  surveyDetails = this.surveyService.singleSurvey;
+  surveyQuestions = this.questionService.questions;
   private route = inject(ActivatedRoute);
-  surveyEnded = input<boolean>(false); // ist die umfrage abgelaufen?
+  isPastSurvey = input<boolean>(false);
   selectionChanged = output<{ questionId: string; optionIds: string[] }>();
 
-  // umfrage und fragen laden wenn die seite startet
+  /**
+   * Loads the survey and its questions using the ID from the route.
+   */
   ngOnInit() {
-    var currentId = String(this.route.snapshot.paramMap.get('id'));
+    let currentId = String(this.route.snapshot.paramMap.get('id'));
     if (currentId) {
-      this.surveyService.loadOneSurvey(currentId);
-      this.questionService.loadQuestions(currentId);
+      this.surveyService.getSingleSurvey(currentId);
+      this.questionService.getQuestionsForSurvey(currentId);
     }
   }
 
-  // gibt "Published" oder "Draft" zurueck
-  getStatusText(): string {
-    var umfrage = this.survey();
-    if (umfrage?.is_published) {
-      return 'Published';
-    }
-    return 'Draft';
+  /**
+   * Returns a readable label for the publish state.
+   * Used to show "Published" or "Draft" in the UI.
+   */
+  getPublishLabel(): string {
+    return this.surveyDetails()?.is_published ? 'Published' : 'Draft';
   }
 
-  // enddatum im deutschen format zurueckgeben (TT.MM.JJJJ)
-  getEndDate() {
-    var serverDate = this.survey()?.end_date;
-
+  /**
+   * Formats the survey end date into a German date format (DD.MM.YYYY).
+   */
+  formatEndDate() {
+    const serverDate = this.surveyDetails()?.end_date;
     if (!serverDate) {
       return null;
-    }
-
-    var date = new Date(serverDate);
+    };
+    const date = new Date(serverDate);
     return new Intl.DateTimeFormat('de-DE', {
       day: '2-digit',
       month: '2-digit',

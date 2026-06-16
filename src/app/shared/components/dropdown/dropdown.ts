@@ -1,7 +1,24 @@
 import { Component, ElementRef, HostListener, input, output, viewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 
-// dropdown komponente zum auswaehlen einer kategorie oder option
+/**
+ * Reusable dropdown component.
+ * Displays a list of options and lets the user pick one.
+ *
+ * Inputs:
+ * - label: Text shown above the dropdown.
+ * - options: The list of selectable values.
+ * - value: The currently selected value.
+ * - control: Optional FormControl to sync the selection with a form.
+ *
+ * Outputs:
+ * - valueChange: Emits the selected option when the user picks one.
+ *
+ * Notes:
+ * - Handles opening/closing the dropdown.
+ * - Closes automatically when clicking outside.
+ * - Updates the connected FormControl if provided.
+ */
 @Component({
   selector: 'app-dropdown',
   imports: [],
@@ -14,39 +31,48 @@ export class Dropdown {
   value = input<string | null>(null);
   valueChange = output<string>();
   dropdownRef = viewChild<ElementRef>('dropdownRef');
-  isOpen = false; // ist das dropdown gerade offen?
+  isCategoriesOpen = false;
   control = input<FormControl>();
 
-  // dropdown oeffnen oder schliessen
-  toggle() {
-    this.isOpen = !this.isOpen;
+  /**
+   * Toggles the dropdown open/closed.
+   */
+  toggleDropdown() {
+    this.isCategoriesOpen = !this.isCategoriesOpen;
   }
 
-  // button wurde geklickt - event nicht weiter propagieren
-  onButtonClick(event: MouseEvent) {
+  /**
+   * Opens the dropdown without letting the click
+   * bubble up to the document click listener.
+   */
+  onTriggerClick(event: MouseEvent) {
     event.stopPropagation();
-    this.toggle();
+    this.toggleDropdown();
   }
 
-  // wenn man ausserhalb klickt soll das dropdown schliessen
+  /**
+   * Closes the dropdown when clicking anywhere outside of it.
+   */
   @HostListener('document:click', ['$event'])
-  onDocumentClick(event: Event) {
-    var target = event.target as HTMLElement;
-    var clickedInside = this.dropdownRef()?.nativeElement.contains(target);
+  handleOutsideClick(event: Event) {
+    const target = event.target as HTMLElement;
+    const clickedInside = this.dropdownRef()?.nativeElement.contains(target);
     if (!clickedInside) {
-      this.isOpen = false;
+      this.isCategoriesOpen = false;
     }
   }
 
-  // eine option wurde ausgewaehlt
-  choose(option: string) {
+  /**
+   * Selects an option, emits the value, and updates the FormControl if present.
+   */
+  select(option: string) {
     this.valueChange.emit(option);
-    var ctrl = this.control();
-    if (ctrl) {
-      ctrl.setValue(option);
-      ctrl.markAsDirty();
-      ctrl.markAsTouched();
+    const control = this.control();
+    if (control) {
+      control.setValue(option);
+      control.markAsDirty();
+      control.markAsTouched();
     }
-    this.isOpen = false;
+    this.isCategoriesOpen = false;
   }
 }

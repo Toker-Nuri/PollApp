@@ -3,112 +3,104 @@ import { Vote } from '../interfaces/vote.interface';
 import { supabase } from './supabase.client';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
-// dieser service verwaltet alle stimmen/votes
+/**
+ * Service for working with votes.
+ * Handles loading votes for questions, options, or a whole survey,
+ * and inserting new votes into Supabase.
+ *
+ * The `votes` signal is used on the survey detail page
+ * to show the results after the user submits their vote.
+ */
+
 @Injectable({
   providedIn: 'root',
 })
 export class VoteService {
-  // alle stimmen als signal gespeichert
-  votes = signal<any[]>([]);
+  votes = signal<Vote[]>([]);
   voteChannel: RealtimeChannel | null = null;
 
-  // stimmen fuer eine bestimmte frage laden
-  async loadVotesForQuestion(questionId: string) {
-    var result = await supabase
-      .from('votes')
-      .select('*')
-      .eq('question_id', questionId);
-
-    var data = result.data;
-    var error = result.error;
-
+  /**
+   * Loads all votes for a specific question.
+   *
+   * @param questionId - The ID of the question to load votes for.
+   * @returns A list of votes or an empty array if something failed.
+   */
+  async getVotesForQuestion(questionId: string) {
+    const { data, error } = await supabase.from('votes').select('*').eq('question_id', questionId);
     if (error) {
-      console.log('fehler in loadVotesForQuestion:', error);
+      console.error('Supabase error at getVotesForQuestion:', error);
       return [];
     }
-
-    if (data == null) {
-      return [];
-    }
-
-    return data;
+    return data ?? [];
   }
 
-  // stimmen fuer eine bestimmte antwort laden
-  async loadVotesForOption(optionId: string): Promise<any[]> {
+  /**
+   * Loads all votes for a specific option.
+   *
+   * @param optionId - The ID of the option to load votes for.
+   * @returns A list of votes or an empty array if something failed.
+   */
+  async getVotesForOption(optionId: string): Promise<Vote[]> {
     try {
-      var result = await supabase
+      let { data: votes, error } = await supabase
         .from('votes')
         .select('*')
         .eq('option_id', optionId);
-
-      var data = result.data;
-      var error = result.error;
-
       if (error) {
-        console.log('fehler in loadVotesForOption:', error);
+        console.error('Supabase error at getVotesForOption:', error);
       }
-
-      if (data == null) {
-        return [];
-      }
-
-      return data;
+      return votes ?? [];
     } catch (err) {
-      console.log('unerwarteter fehler in loadVotesForOption:', err);
+      console.error('Unexpected JS runtime error at getVotesForOption:', err);
       return [];
     }
   }
 
-  // alle stimmen fuer eine ganze umfrage laden
-  async loadVotes(surveyId: string) {
+  /**
+   * Loads all votes for all questions inside a survey.
+   * Updates the `votes` signal with the result.
+   *
+   * @param surveyId - The ID of the survey to load votes for.
+   */
+  async getVotesForSurvey(surveyId: string) {
     try {
-      var result = await supabase
+      const { data, error } = await supabase
         .from('votes')
         .select('*, questions!inner(survey_id)')
         .eq('questions.survey_id', surveyId);
 
-      var data = result.data;
-      var error = result.error;
-
       if (error) {
-        console.log('fehler in loadVotes:', error);
+        console.error('getVotesForSurvey error:', error);
         this.votes.set([]);
         return;
       }
 
-      if (data == null) {
-        this.votes.set([]);
-        return;
-      }
-
-      this.votes.set(data as Vote[]);
+      this.votes.set((data as Vote[]) ?? []);
     } catch (err) {
-      console.log('unerwarteter fehler in loadVotes:', err);
+      console.error('Unexpected JS runtime error at getVotesForSurvey:', err);
       this.votes.set([]);
     }
   }
 
-  // stimme abgeben fuer eine oder mehrere antworten
-  async saveVote(questionId: string, optionIds: string[]) {
+  /**
+   * Inserts one or more votes for a question.
+   * Called when the user submits their selected options.
+   *
+   * @param questionId - The question being voted on.
+   * @param optionIds - One or multiple option IDs the user selected.
+   */
+  async insertVote(questionId: string, optionIds: string[]) {
     try {
-      // fuer jede ausgewaehlte antwort einen eintrag erstellen
-      var payload = [];
-      for (var i = 0; i < optionIds.length; i++) {
-        payload.push({
-          question_id: questionId,
-          option_id: optionIds[i],
-        });
-      }
-
-      var result = await supabase.from('votes').insert(payload).select();
-      var error = result.error;
-
+      const payload = optionIds.map((optionId) => ({
+        question_id: questionId,
+        option_id: optionId,
+      }));
+      const { data, error } = await supabase.from('votes').insert(payload).select();
       if (error) {
-        console.log('fehler beim speichern der stimme:', error);
+        console.error('Supabase error at insertVotes:', error);
       }
     } catch (err) {
-      console.log('unerwarteter fehler in saveVote', err);
+      console.error('Unexpected JS runtime error at insertVotes', err);
     }
   }
 }

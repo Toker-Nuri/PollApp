@@ -10,42 +10,79 @@ import { ReactiveFormsModule } from '@angular/forms';
   styleUrl: './create-question.component.scss',
 })
 
-// formular fuer eine einzelne frage in der umfrage
+/**
+ * Handles the UI for creating and editing a single question
+ * inside the create‑survey page.
+ *
+ * Inputs:
+ * - questionIndex: The index of this question in the survey.
+ * - questionGroup: The FormGroup that holds all controls for this question.
+ *
+ * Outputs:
+ * - addOption: Fired when the user adds a new option.
+ * - deleteOption: Fired when the user removes an option.
+ * - deleteQuestion: Fired when the user deletes this question.
+ *
+ * Notes:
+ * - Uses CreateOption as a child component to manage the option list.
+ * - Tracks validation state for the question text using `isVisible`.
+ */
 export class CreateQuestion {
-  errorVisible: boolean = false; // zeigt fehler wenn frage leer ist
+  isVisible: boolean = false;
   questionIndex = input<number>();
   questionGroup = input<any>();
   addOption = output<void>();
   deleteOption = output<number>();
   deleteQuestion = output<void>();
-  @ViewChild('createOption') optionComp!: CreateOption;
+  @ViewChild('createOption') createOptionComponent!: CreateOption;
 
-  // fehler anzeigen wenn fragefeld leer ist
-  checkQuestion() {
-    var control = this.getTextField();
-    this.errorVisible = !control?.value?.trim();
+  /**
+   * Shows or hides the error message for the question text.
+   * Called when the user types or leaves the input field.
+   */
+  showErrorMsg() {
+    const control = this.getQuestionControl();
+    this.isVisible = !control?.value?.trim();
   }
 
-  // alle fehler fuer diese frage zuruecksetzen
-  clearErrors() {
-    this.errorVisible = false;
-    this.optionComp.clearErrors();
+  /**
+   * Resets all validation errors for this question and its options.
+   * Called when the form is cleared or reset.
+   */
+  resetSurveyQuestionErr() {
+    this.isVisible = false;
+    this.createOptionComponent.resetSurveyOptionErr();
   }
 
-  // alle fehler auf einmal anzeigen (beim absenden)
-  showErrors() {
-    var control = this.getTextField();
-    this.errorVisible = !control.value?.trim();
-    this.optionComp.showErrors();
+  /**
+   * Validates the question text and all option fields at once.
+   * Used when the user tries to submit the survey.
+   */
+  showAllErrors() {
+    const control = this.getQuestionControl();
+    this.isVisible = !control.value?.trim();
+
+    this.createOptionComponent.showAllErrors();
   }
 
-  // gibt das textfeld der frage zurueck
-  getTextField() {
+  /**
+   * Returns the FormControl for the question text.
+   */
+  getTextControl() {
     return this.questionGroup().get('text');
   }
 
-  // gibt das checkbox control zurueck
-  get multipleControl() {
+  /**
+   * Returns the FormControl for the "allow multiple answers" checkbox.
+   */
+  get multipleAnswerControl() {
     return this.questionGroup().get('allow_multiple');
+  }
+
+  /**
+   * Shortcut for accessing the question text control.
+   */
+  getQuestionControl() {
+    return this.questionGroup().get('text');
   }
 }

@@ -1,6 +1,13 @@
 import { Component, output } from '@angular/core';
 
-// einfacher loeschen-button der ein event ausgibt wenn man draufklickt
+/**
+ * Reusable delete button component.
+ * Emits a delete event when clicked.
+ *
+ * Notes:
+ * - Used across the app for clearing inputs or removing items.
+ * - Contains only UI and an output event.
+ */
 @Component({
   selector: 'app-delete-btn',
   imports: [],
@@ -8,6 +15,8 @@ import { Component, output } from '@angular/core';
   styleUrl: './delete-btn.scss',
 })
 export class DeleteBtn {
-  // wird ausgeloest wenn der button geklickt wird
+  /**
+   * Fired when the delete button is clicked.
+   */
   delete = output<void>();
 }

@@ -5,7 +5,7 @@
     'landing-page__active-cards': secondaryStyle(),
   }"
 >
-  @for (item of getSurveys(); track item.id) {
+  @for (item of getfilteredSurveys(); track item.id) {
     <article
       [class.card-primary]="!secondaryStyle()"
       [class.survey-card]="!secondaryStyle()"
@@ -28,7 +28,7 @@
         [class.card-primary__badge]="!secondaryStyle()"
         [class.card-secondary__badge]="secondaryStyle()"
       >
-        {{ getDaysLeft(item.end_date) }}
+        {{ calculateRemainingDays(item.end_date) }}
       </span>
     </article>
   } @empty {

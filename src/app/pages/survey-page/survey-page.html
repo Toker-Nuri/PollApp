@@ -6,19 +6,18 @@
         src="/assets/images/ui/logo_dark.svg"
         alt="the logo of the app"
       />
-      <button (click)="openModal()" class="btn btn--primary btn--icon-plus">
+      <button (click)="openCreateSurveyModal()" class="btn btn--primary btn--icon-plus">
         Create survey
       </button>
     </nav>
   </header>
-  <!-- modal zum erstellen einer neuen umfrage -->
-  <app-dialog [(open)]="modalOpen">
-    <app-survey-create-page (close)="modalOpen = false"></app-survey-create-page>
+  <app-dialog [(open)]="isCreateSurveyOpen">
+    <app-survey-create-page (close)="isCreateSurveyOpen = false"></app-survey-create-page>
   </app-dialog>
   <main class="survey-details-page">
-    <!-- linke seite: umfrage mit fragen -->
+    <!-- LEFT: SURVEY DETAILS -->
     <section class="survey-details__survey card-primary-sd">
-      <button class="close-btn--mobile" (click)="submitAnswers()">
+      <button class="close-btn--mobile" (click)="completeSurvey()">
         <svg
           width="14"
           height="16"
@@ -34,24 +33,24 @@
       </button>
 
       <app-survey-detail
-        [surveyEnded]="surveyEnded || alreadyVoted"
-        (selectionChanged)="onAnswerChanged($event)"
+        [isPastSurvey]="isPastSurvey || userHasVoted"
+        (selectionChanged)="onSelectionChanged($event)"
       ></app-survey-detail>
       <button
-        (click)="submitAnswers()"
+        (click)="completeSurvey()"
         class="survey-details__btn btn btn--primary"
-        [disabled]="surveyEnded || alreadyVoted"
+        [disabled]="isPastSurvey || userHasVoted"
       >
         Complete survey
       </button>
     </section>
-    <!-- rechte seite: ergebnisse anzeigen -->
+    <!-- RIGHT: DISPLAY VOTES -->
     <button
       class="see-results-btn--mobile"
-      (click)="showResults = !showResults"
-      [class.active]="showResults"
+      (click)="showResultsMobile = !showResultsMobile"
+      [class.active]="showResultsMobile"
     >
-      {{ !showResults ? 'See results' : 'Hide results' }}
+      {{ !showResultsMobile ? 'See results' : 'Hide results' }}
       <svg xmlns="http://www.w3.org/2000/svg" width="15" height="8" viewBox="0 0 15 8" fill="none">
         <path
           d="M6.5843 7.61702L0.261628 1.44681C0.174419 1.3617 0.109012 1.2695 0.065407 1.17021C0.0218023 1.07092 0 0.964539 0 0.851064C0 0.624114 0.0799419 0.425532 0.239826 0.255319C0.399709 0.0851064 0.610465 0 0.872093 0H14.1279C14.3895 0 14.6003 0.0851064 14.7602 0.255319C14.9201 0.425532 15 0.624114 15 0.851064C15 0.907802 14.9128 1.10638 14.7384 1.44681L8.4157 7.61702C8.27035 7.75887 8.125 7.85816 7.97965 7.91489C7.8343 7.97163 7.67442 8 7.5 8C7.32558 8 7.1657 7.97163 7.02035 7.91489C6.875 7.85816 6.72965 7.75887 6.5843 7.61702Z"
@@ -59,30 +58,30 @@
         />
       </svg>
     </button>
-    @if (showResults) {
+    @if (showResultsMobile) {
       <section class="survey-details__votes results-anim">
         <h2>Survey results <span>live</span></h2>
         <div class="survey-details__votes-container">
-          @if (!hasAnyVotes() && !hasLocalAnswers()) {
+          @if (!hasVotes() && !hasLocalVotes()) {
             <div class="survey-details__placeholder">
               <p>Results will be shown here after participants complete the survey.</p>
               <p>There are no answers yet.</p>
             </div>
           }
-          @if (hasAnyVotes() || hasLocalAnswers()) {
+          @if (hasVotes() || hasLocalVotes()) {
             @for (q of questions(); track q.id) {
               <div class="survey-details__live-results">
                 <app-vote-results
                   [question]="q"
-                  [options]="getOptionsForQ(q.id)"
-                  [votes]="getVotesForQ(q.id)"
-                  [localVotes]="selectedAnswers.get(q.id) ?? []"
+                  [options]="optionsForQuestion(q.id)"
+                  [votes]="votesForQuestion(q.id)"
+                  [localVotes]="answers.get(q.id) ?? []"
                 >
                 </app-vote-results>
               </div>
             }
           }
-          @if (alreadyVoted) {
+          @if (userHasVoted) {
             <p class="survey-details__already-voted">You have already voted in this survey.</p>
           }
         </div>

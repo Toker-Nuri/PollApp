@@ -5,8 +5,16 @@ import { Dialog } from '../../shared/components/dialog/dialog';
 import { SURVEY_CATEGORIES } from '../../shared/constants/survey-categories';
 import { SurveyCreatePage } from '../survey-create/survey-create-page';
 
-// die startseite der app
-// zeigt alle umfragen und einen button zum erstellen
+/**
+ * The main landing page of the app.
+ * Displays survey lists, category filters, and the button
+ * for opening the create‑survey modal.
+ *
+ * Notes:
+ * - Adds a data attribute to the <body> for page‑specific styling.
+ * - Manages the selected category and active filter.
+ * - Controls the visibility of the create‑survey modal.
+ */
 @Component({
   selector: 'app-landing-page',
   imports: [SurveyListComponent, Dropdown, SurveyCreatePage, Dialog],
@@ -14,25 +22,32 @@ import { SurveyCreatePage } from '../survey-create/survey-create-page';
   styleUrl: './landing-page.scss',
 })
 export class LandingPage {
-  currentFilter: 'active' | 'past' = 'active'; // aktiver oder vergangene umfragen
+  activeFilter: 'active' | 'past' = 'active';
   categories = ['All surveys', ...SURVEY_CATEGORIES];
-  chosenCategory: string | null = null; // ausgewaehlte kategorie
-  modalOpen = false; // ist das erstellen-modal offen?
+  selectedCategory: string | null = null;
+  isCreateSurveyOpen = false;
 
   @ViewChild('createSurveyModal') modal!: ElementRef<HTMLDialogElement>;
 
-  // seiten-identifier fuer css setzen
+  /**
+   * Adds a page identifier to the <body> element.
+   * Used for page‑specific styling.
+   */
   ngOnInit() {
     document.body.setAttribute('data-page', 'landing');
   }
 
-  // seiten-identifier wieder entfernen
+  /**
+   * Removes the page identifier when leaving the page.
+   */
   ngOnDestroy() {
     document.body.removeAttribute('data-page');
   }
 
-  // modal zum erstellen einer umfrage oeffnen
-  openModal() {
-    this.modalOpen = true;
+  /**
+   * Opens the create‑survey modal.
+   */
+  openCreateSurveyModal() {
+    this.isCreateSurveyOpen = true;
   }
 }

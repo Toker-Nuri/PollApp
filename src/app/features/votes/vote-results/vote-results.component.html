@@ -8,10 +8,10 @@
       <p>{{ o.order_index }}</p>
       <div class="vote-bar">
         <div class="vote-bar__track"></div>
-        <div class="vote-bar__fill" [style.width.%]="toPercent(o.id)"></div>
+        <div class="vote-bar__fill" [style.width.%]="computeVotesToPercentages(o.id)"></div>
       </div>
       <span class="vote-restults__percentage">{{
-        toPercent(o.id) | percentage: 0
+        computeVotesToPercentages(o.id) | percentage: 0
       }}</span>
     </div>
   }

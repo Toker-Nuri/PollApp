@@ -4,8 +4,22 @@ import { RouterLink } from '@angular/router';
 import { NgClass } from '@angular/common';
 import { Survey } from '../../../core/interfaces/survey.interface';
 
-// zeigt eine liste von umfragen an
-// man kann filtern sortieren und begrenzen
+/**
+ * Displays a list of surveys with optional filtering, sorting, and limiting.
+ * Used on multiple pages (landing page, category pages, etc.).
+ *
+ * Inputs:
+ * - filter: Filters surveys by status ("ending-soon", "active", "past").
+ * - limit: Limits how many surveys are shown.
+ * - sort: Sorts surveys (e.g. "soonest-first").
+ * - secondaryStyle: Enables an alternate card style.
+ * - category: Filters surveys by category name.
+ *
+ * Notes:
+ * - Loads all surveys on init.
+ * - Uses several small helper functions to filter and sort the list.
+ */
+
 @Component({
   selector: 'app-survey-list',
   imports: [RouterLink, NgClass],
@@ -14,111 +28,123 @@ import { Survey } from '../../../core/interfaces/survey.interface';
 })
 export class SurveyListComponent {
   surveyService = inject(SurveyService);
-  allSurveys = this.surveyService.surveys;
+  surveyList = this.surveyService.surveys;
   filter = input<string | undefined>();
   limit = input<number | undefined>();
   sort = input<string | undefined>();
   secondaryStyle = input(false);
   category = input<string | null>();
 
-  // beim laden alle umfragen holen
+  /**
+   * Loads all surveys when the component starts.
+   */
   ngOnInit() {
-    this.surveyService.loadSurveys();
+    this.surveyService.getAllSurveys();
   }
 
-  // umfragen nach status filtern (aktiv, abgelaufen, etc)
-  private applyFilter(list: Survey[]) {
-    var today = this.stripTime(new Date());
+  /**
+   * Filters surveys based on the selected filter type.
+   * - "ending-soon" → surveys that haven't expired
+   * - "active" → same as ending-soon
+   * - "past" → surveys that already expired
+   */
+  private filterSurveys(list: Survey[]) {
+    const today = this.normalize(new Date());
+    return list.filter((s) => {
+      const hasEndDate = !!s.end_date;
+      const end = hasEndDate ? new Date(s.end_date) : null;
 
-    var gefiltert = list.filter((s) => {
-      var hatEnddatum = !!s.end_date;
-      var end = null;
-      if (hatEnddatum) {
-        end = new Date(s.end_date);
+      switch (this.filter()) {
+        case 'ending-soon':
+          // Only surveys WITH an end date in the future
+          return hasEndDate && end! >= today;
+
+        case 'active':
+          // Surveys with NO end date OR end date in the future
+          return !hasEndDate || end! >= today;
+
+        case 'past':
+          // Only surveys WITH an end date in the past
+          return hasEndDate && end! < today;
+
+        default:
+          return true;
       }
-
-      if (this.filter() === 'ending-soon') {
-        // nur umfragen die noch nicht abgelaufen sind und ein enddatum haben
-        return hatEnddatum && end! >= today;
-      }
-
-      if (this.filter() === 'active') {
-        // umfragen ohne enddatum oder mit zukuenftigem enddatum
-        return !hatEnddatum || end! >= today;
-      }
-
-      if (this.filter() === 'past') {
-        // nur abgelaufene umfragen
-        return hatEnddatum && end! < today;
-      }
-
-      return true;
     });
-
-    return gefiltert;
   }
 
-  // umfragen sortieren
-  private applySort(list: Survey[]) {
+  /**
+   * Sorts surveys based on the selected sort option.
+   * Currently supports:
+   * - "soonest-first" → earliest end date first
+   */
+  private sortSurveys(list: Survey[]) {
     if (this.sort() === 'soonest-first') {
-      return list.sort((a, b) => {
-        return new Date(a.end_date).getTime() - new Date(b.end_date).getTime();
-      });
+      return list.sort((a, b) => new Date(a.end_date).getTime() - new Date(b.end_date).getTime());
     }
     return list;
   }
 
-  // liste auf eine bestimmte anzahl begrenzen
-  private applyLimit(list: Survey[]) {
-    if (this.limit) {
-      return list.slice(0, this.limit());
-    }
-    return list;
+  /**
+   * Limits how many surveys are shown.
+   * Used for sections like "Ending soon (3 items)".
+   */
+  private limitSurveys(list: Survey[]) {
+    return this.limit ? list.slice(0, this.limit()) : list;
   }
 
-  // uhrzeit aus einem datum entfernen damit vergleiche klappen
-  private stripTime(date: Date) {
+  /**
+   * Normalizes a date to remove the time part.
+   * Makes date comparisons easier.
+   */
+  private normalize(date: Date) {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate());
   }
 
-  // nach kategorie filtern
-  private filterCategory(list: Survey[]) {
-    var cat = this.category();
-    if (!cat || cat === 'All surveys') {
+  /**
+   * Filters surveys by category.
+   * If category is "All surveys", nothing is filtered.
+   */
+  private filterByCategory(list: Survey[]) {
+    const category = this.category();
+    if (!category || category === 'All surveys') {
       return list;
     }
-    return list.filter((s) => s.category === cat);
+    return list.filter((s) => s.category === category);
   }
 
-  // alle filter und sortierungen anwenden und liste zurueckgeben
-  getSurveys() {
-    var list = [...this.allSurveys()];
-    list = this.applyFilter(list);
-    list = this.filterCategory(list);
-    list = this.applySort(list);
-    list = this.applyLimit(list);
+  /**
+   * Runs all filters, sorting, and limiting in order.
+   * Returns the final list that the template displays.
+   */
+  getfilteredSurveys() {
+    let list = [...this.surveyList()];
+    list = this.filterSurveys(list);
+    list = this.filterByCategory(list);
+    list = this.sortSurveys(list);
+    list = this.limitSurveys(list);
     return list;
   }
 
-  // berechnet wie viele tage noch uebrig sind
-  getDaysLeft(serverDate: string) {
-    if (!serverDate) {
-      return 'No end date.';
-    }
-
-    var surveyDate = new Date(serverDate);
-    var today = new Date();
-    var diff = surveyDate.getTime() - today.getTime();
-    var tage = Math.ceil(diff / 86400000);
-
-    if (tage < 0) {
+  /**
+   * Calculates how many days are left until a survey expires.
+   * Returns a readable message for the UI.
+   */
+  calculateRemainingDays(serverDate: string) {
+     if (!serverDate) {
+    return 'No end date.';
+  }
+    const surveyDate = new Date(serverDate);
+    const today = new Date();
+    const remainingDays = (surveyDate.getTime() - today.getTime()) / 86400000;
+    const roundUpDays = Math.ceil(remainingDays);
+    if (roundUpDays < 0) {
       return 'Survey expired';
     }
-
-    if (tage === 0) {
+    if (roundUpDays === 0) {
       return 'Ends today';
-    }
-
-    return `Ends in ${tage} days.`;
+    } else {
+      return `Ends in ${roundUpDays} days.`;
+    } 
   }
 }

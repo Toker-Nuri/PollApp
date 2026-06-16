@@ -3,7 +3,7 @@
     <li
       class="option-item__entry"
       [class.disabled]="isPastSurvey()"
-      (click)="!isPastSurvey() && onOptionClick(option().id)"
+      (click)="!isPastSurvey() && submitVote(option().id)"
     >
       <span class="checkbox" [class.checkbox--checked]="isChecked()"></span>
       <span class="option-item__index">{{ option().order_index }}.</span>

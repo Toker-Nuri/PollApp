@@ -6,7 +6,24 @@ import { Option } from '../../../core/interfaces/option.interface';
 import { supabase } from '../../../core/services/supabase.client';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
-// zeigt eine einzelne frage mit allen antworten an
+/**
+ * Displays a single question with all its answer options.
+ * Handles option selection and sends the selected option IDs
+ * back to the parent component.
+ *
+ * Inputs:
+ * - question: The question data (text, allow_multiple, id).
+ * - isPastSurvey: If true, the question is read‑only.
+ *
+ * Outputs:
+ * - selectedChange: Emits the question ID and the selected option IDs.
+ *
+ * Notes:
+ * - Loads options for this question on init.
+ * - Listens for new option inserts in realtime (only for this question).
+ * - Manages selected options using a signal.
+ */
+
 @Component({
   selector: 'app-question-item',
   imports: [OptionItem],
@@ -16,31 +33,37 @@ import { RealtimeChannel } from '@supabase/supabase-js';
 export class QuestionItem {
   question = input.required<Question>();
   optionService = inject(OptionService);
-  options = signal<Option[]>([]); // antworten fuer diese frage
+  options = signal<Option[]>([]);
   private optionChannel: RealtimeChannel | null = null;
   isPastSurvey = input<boolean>(false);
-  selectedOptions = signal<string[]>([]); // ausgewaehlte antworten
+  selectedOptions = signal<string[]>([]);
   selectedChange = output<{ questionId: string; optionIds: string[] }>();
 
-  // beim start antworten laden und echtzeit starten
+  /**
+   * Loads the initial options for this question
+   * and starts listening for new option inserts.
+   */
   async ngOnInit() {
-    var initialOptions = await this.optionService.loadOptions(this.question().id);
+    const initialOptions = await this.optionService.getOptionsForQuestion(this.question().id);
     this.options.set(initialOptions);
-    this.startRealtimeSync();
+    this.listenForOptionInserts();
   }
 
-  // channel beim beenden aufraumen
+  /**
+   * Cleans up the realtime subscription when the component is destroyed.
+   */
   ngOnDestroy() {
-    this.stopRealtimeSync();
+    this.stopListeningForOptionInsert();
   }
 
-  // echtzeit-updates fuer neue antworten starten
-  startRealtimeSync() {
+  /**
+   * Subscribes to realtime option inserts for this specific question.
+   * Adds new options to the `options` signal.
+   */
+  listenForOptionInserts() {
     if (this.optionChannel) {
-      this.stopRealtimeSync();
+      this.stopListeningForOptionInsert();
     }
-
-    // auf neue antworten in der datenbank hoeren
     this.optionChannel = supabase
       .channel(`options-insert-${this.question().id}`)
       .on(
@@ -52,43 +75,43 @@ export class QuestionItem {
           filter: `question_id=eq.${this.question().id}`,
         },
         (payload) => {
-          // neue antwort zur liste hinzufuegen
-          var newOption = payload.new as Option;
+          const newOption = payload.new as Option;
           this.options.update((current) => [...current, newOption]);
         },
       )
       .subscribe();
   }
 
-  // echtzeit-updates stoppen
-  stopRealtimeSync() {
+  /**
+   * Stops the realtime listener for option inserts.
+   * Prevents memory leaks when the component is removed.
+   */
+  stopListeningForOptionInsert() {
     if (this.optionChannel) {
       supabase.removeChannel(this.optionChannel);
       this.optionChannel = null;
     }
   }
 
-  // prueft ob mehrere antworten erlaubt sind
-  multipleChoice(): boolean {
+  /**
+   * Returns true if the question allows selecting multiple options.
+   */
+  isMultipleAllowed(): boolean {
     return this.question().allow_multiple === true;
   }
 
-  // antwort wurde angeklickt
-  optionClick(optionId: string) {
-    if (this.multipleChoice()) {
-      // mehrere antworten erlaubt - toggle
-      this.selectedOptions.update((list) => {
-        if (list.includes(optionId)) {
-          return list.filter((id) => id !== optionId);
-        } else {
-          return [...list, optionId];
-        }
-      });
+  /**
+   * Handles option clicks.
+   * Updates the selected options and emits the change to the parent.
+   */
+  onOptionClicked(optionId: string) {
+    if (this.isMultipleAllowed()) {
+      this.selectedOptions.update((list) =>
+        list.includes(optionId) ? list.filter((id) => id !== optionId) : [...list, optionId],
+      );
     } else {
-      // nur eine antwort erlaubt
       this.selectedOptions.set([optionId]);
     }
-
     this.selectedChange.emit({
       questionId: this.question().id,
       optionIds: this.selectedOptions(),

@@ -50,10 +50,10 @@
 .create-survey__add-answer {
   @include flex-space-btw;
   width: 100%;
-  max-width: 310px;
+  max-width: 340px;
   margin: 8px 0;
   span {
-    font-size: 12px;
+    font-size: 14px;
   }
 }
 
@@ -69,7 +69,7 @@
   }
 }
 
-@media(max-width: 550px){
+@media (max-width: 550px) {
   .create-survey__add-answer {
     flex-direction: column;
     align-items: flex-start;

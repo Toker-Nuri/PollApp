@@ -224,6 +224,11 @@
     }
   }
 
+  .survey-create-main-header {
+    display: block;
+    padding: 10px;
+  }
+
   .create-survey__main {
     padding: 20px;
   }
@@ -235,7 +240,7 @@
 
 @media (max-width: 400px) {
   .create-survey__body {
-    padding: 0;
+    padding: 8px;
   }
 
   .create-survey__main {
@@ -244,5 +249,11 @@
 
   .create-survey__add-question-btn {
     margin-bottom: 16px;
+  }
+}
+
+@media (max-width: 700px) {
+  .container {
+    padding: 0;
   }
 }

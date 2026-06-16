@@ -4,7 +4,7 @@
   </header>
 
   <main class="landing-page">
-    <!-- hero bereich oben -->
+    <!-- HERO SECTION -->
     <section class="landing-page__hero">
       <div class="landing-page__hero-left">
         <h1 class="landing-page__title">Collect Feedback, <br />Unlock Ideas</h1>
@@ -41,11 +41,11 @@
           Create and share surveys in minutes - from team events to workplace culture. Collect
           opinions, engage your audience, and turn feedback into action.
         </p>
-        <button class="btn btn--primary btn--icon-plus" (click)="openModal()">
+        <button class="btn btn--primary btn--icon-plus" (click)="openCreateSurveyModal()">
           New survey
         </button>
-        <app-dialog [(open)]="modalOpen">
-          <app-survey-create-page (close)="modalOpen = false"></app-survey-create-page>
+        <app-dialog [(open)]="isCreateSurveyOpen">
+          <app-survey-create-page (close)="isCreateSurveyOpen = false"></app-survey-create-page>
         </app-dialog>
       </div>
       <div class="landing-page__hero-right">
@@ -79,7 +79,7 @@
       </div>
     </section>
 
-    <!-- umfragen die bald ablaufen -->
+    <!-- ENDING SOON SECTION -->
     <section class="landing-page__ending-soon centered-section section-spacing-vertical">
       <h2 class="landing-page__section-title">Your surveys</h2>
       <h3 class="landing-page__section-subtitle">Ending soon surveys</h3>
@@ -91,24 +91,24 @@
       ></app-survey-list>
     </section>
 
-    <!-- aktive und vergangene umfragen mit filter -->
+    <!-- ACTIVE / PAST SURVEYS SECTION -->
     <section class="landing-page__filters centered-section section-spacing-vertical">
       <div class="landing-page__filters-top">
         <div class="landing-page__filters-left">
           <button
             class="btn-secondary"
-            [class.btn-secondary-active]="currentFilter === 'active'"
-            [class.btn-secondary-inactive]="currentFilter !== 'active'"
-            (click)="currentFilter = 'active'"
+            [class.btn-secondary-active]="activeFilter === 'active'"
+            [class.btn-secondary-inactive]="activeFilter !== 'active'"
+            (click)="activeFilter = 'active'"
           >
             Active surveys
           </button>
 
           <button
             class="btn-secondary"
-            [class.btn-secondary-active]="currentFilter === 'past'"
-            [class.btn-secondary-inactive]="currentFilter !== 'past'"
-            (click)="currentFilter = 'past'"
+            [class.btn-secondary-active]="activeFilter === 'past'"
+            [class.btn-secondary-inactive]="activeFilter !== 'past'"
+            (click)="activeFilter = 'past'"
           >
             Past surveys
           </button>
@@ -118,16 +118,15 @@
           <app-dropdown
             label="Sort by category"
             [options]="categories"
-            [(value)]="chosenCategory"
+            [(value)]="selectedCategory"
           ></app-dropdown>
         </div>
       </div>
-      <!-- umfragenliste mit filtern -->
       <app-survey-list
-        [filter]="currentFilter"
+        [filter]="activeFilter"
         sort="soonest-first"
         [secondaryStyle]="true"
-        [category]="chosenCategory"
+        [category]="selectedCategory"
       >
       </app-survey-list>
     </section>

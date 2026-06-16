@@ -1,7 +1,19 @@
 import { Component, input, output } from '@angular/core';
 
-// ein dialog/modal fenster
-// wird geoeffnet oder geschlossen je nach dem "open" input
+/**
+ * Reusable dialog (modal) component.
+ * Opens and closes based on the `open` input.
+ *
+ * Inputs:
+ * - open: Controls whether the dialog is visible.
+ *
+ * Outputs:
+ * - openChange: Emits true/false when the dialog is opened or closed.
+ *
+ * Notes:
+ * - Locks the page scroll when the dialog is open.
+ * - Only handles UI state; the parent controls when it opens or closes.
+ */
 @Component({
   selector: 'app-dialog',
   standalone: true,
@@ -12,15 +24,18 @@ export class Dialog {
   open = input<boolean>(false);
   openChange = output<boolean>();
 
-  // dialog schliessen und dem parent bescheid geben
-  closeDialog() {
+  /**
+   * Closes the dialog and notifies the parent.
+   */
+  close() {
     this.openChange.emit(false);
   }
 
-  // wenn sich open aendert soll scrollen blockiert werden
+  /**
+   * Locks or unlocks page scrolling based on dialog visibility.
+   */
   ngOnChanges() {
     if (this.open()) {
-      // scrollen verhindern wenn dialog offen ist
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';

@@ -7,8 +7,8 @@
         <input
           type="text"
           class="survey__input--standard-width survey__input--card"
-          (blur)="checkTitle()"
-          (input)="checkTitle()"
+          (blur)="showErrorMsg()"
+          (input)="showErrorMsg()"
           [formControl]="titleControl()"
         />
         <app-delete-btn (delete)="clearSurveyName.emit()"></app-delete-btn>
@@ -41,7 +41,7 @@
           [options]="categories"
           [control]="categoryControl()"
           [(value)]="selectedCategory"
-          (valueChange)="categoryPicked($event)"
+          (valueChange)="onCategorySelected($event)"
         ></app-dropdown>
       </div>
     </div>

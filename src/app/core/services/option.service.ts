@@ -2,76 +2,83 @@ import { Injectable, signal } from '@angular/core';
 import { Option } from '../interfaces/option.interface';
 import { supabase } from './supabase.client';
 
-// der service fuer antwortmoeglichkeiten
+/**
+ * Service for working with answer options.
+ * Handles loading options for a question or a whole survey,
+ * and inserting new options into Supabase.
+ */
+
 @Injectable({
   providedIn: 'root',
 })
 export class OptionService {
-  // alle antworten gespeichert als signal
-  options = signal<any[]>([]);
+  options = signal<Option[]>([]);
 
-  // antworten fuer eine frage laden
-  async loadOptions(questionId: string): Promise<any[]> {
+  /**
+   * Loads all options that belong to a specific question.
+   * Returns the list directly (does not update the signal).
+   *
+   * @param questionId - The ID of the question to load options for.
+   * @returns A list of options or an empty array if something failed.
+   */
+  async getOptionsForQuestion(questionId: string): Promise<Option[]> {
     try {
-      var result = await supabase
+      const { data, error } = await supabase
         .from('options')
         .select('*')
         .eq('question_id', questionId)
         .order('order_index', { ascending: true });
 
-      var data = result.data;
-      var error = result.error;
-
       if (error) {
-        console.log('fehler beim laden der antworten:', error);
+        console.error('getOptionsForQuestion error:', error);
         return [];
       }
 
-      if (data == null) {
-        return [];
-      }
-
-      return data;
+      return data ?? [];
     } catch (err) {
-      console.log('unerwarteter fehler in loadOptions:', err);
+      console.error('Unexpected error in getOptionsForQuestion:', err);
       return [];
     }
   }
 
-  // alle antworten fuer eine komplette umfrage laden
-  async loadAllOptions(surveyId: string): Promise<void> {
+  /**
+   * Loads all options for all questions inside a survey.
+   * Updates the `options` signal with the result.
+   * Used on the survey detail page to show all results.
+   *
+   * @param surveyId - The ID of the survey to load options for.
+   */
+  async getOptionsForSurvey(surveyId: string): Promise<void> {
     try {
-      var result = await supabase
+      const { data, error } = await supabase
         .from('options')
         .select('*, questions!inner(survey_id)')
         .eq('questions.survey_id', surveyId)
         .order('order_index', { ascending: true });
 
-      var data = result.data;
-      var error = result.error;
-
       if (error) {
-        console.log('fehler in loadAllOptions:', error);
+        console.error('getOptionsForSurvey error:', error);
         this.options.set([]);
         return;
       }
 
-      if (data == null) {
-        this.options.set([]);
-        return;
-      }
-
-      this.options.set(data as Option[]);
+      this.options.set((data as Option[]) ?? []);
     } catch (err) {
-      console.log('unerwarteter fehler in loadAllOptions:', err);
+      console.error('Unexpected error in getOptionsForSurvey:', err);
       this.options.set([]);
     }
   }
 
-  // eine neue antwort speichern
-  async saveOption(option: any, questionId: number) {
+  /**
+   * Inserts a new option for a specific question.
+   *
+   * @param option - The form data for the new option.
+   * @param questionId - The ID of the question this option belongs to.
+   * @returns The newly created option or undefined if something failed.
+   */
+  async insertOptions(option: any, questionId: number) {
     try {
-      var result = await supabase
+      const { data, error } = await supabase
         .from('options')
         .insert({
           question_id: questionId,
@@ -79,17 +86,12 @@ export class OptionService {
           order_index: option.order_index,
         })
         .select();
-
-      var data = result.data;
-      var error = result.error;
-
       if (error) {
-        console.log('fehler beim speichern der antwort:', error);
+        console.error('Supabase error at insertOptions:', error);
       }
-
       return data?.[0];
     } catch (err) {
-      console.log('unerwarteter fehler in saveOption', err);
+      console.error('Unexpected JS runtime error at insertOptions', err);
     }
   }
 }
