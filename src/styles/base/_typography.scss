@@ -16,27 +16,22 @@ $fonts: (
 $font-sizes: (
   // Nerko One — main hero
   h1: clamp(2.5rem, 6vw + 1rem, 100px),
-  
   // Nerko One — section titles
   h2: clamp(2rem, 5vw + 0.5rem, 72px),
-
   // Mulish 500 — big text
   text-large: clamp(1.5rem, 2vw + 0.5rem, 32px),
-
   // Mulish 600 — medium text
   text-medium: clamp(1.25rem, 1vw + 0.5rem, 24px),
-  
   // Mulish 700 — survey card titles
   text-card-title: clamp(1.1rem, 1vw + 0.3rem, 26px),
-  
   // Mulish 400 — default body
   text-regular: 16px,
 
   // Mulish 400 — small labels
-  text-small: 14px,
-  
+  text-small: 16px,
+
   // Nokora 700 — buttons
-  button: 18px, 
+  button: 18px
 );
 
 :root {
@@ -57,7 +52,7 @@ $font-sizes: (
   font-family: 'Nerko One';
   font-style: normal;
   font-weight: 400;
-  src: url('/assets/fonts/nerko-one-v17-latin-regular.woff2') format('woff2');
+  src: url('../../../public/assets/fonts/nerko-one-v17-latin-regular.woff2') format('woff2');
 }
 
 /* Nokora — Buttons */
@@ -66,7 +61,7 @@ $font-sizes: (
   font-family: 'Nokora';
   font-style: normal;
   font-weight: 400;
-  src: url('/assets/fonts/nokora-v34-latin-regular.woff2') format('woff2');
+  src: url('../../../public/assets/fonts/nokora-v34-latin-regular.woff2') format('woff2');
 }
 
 @font-face {
@@ -74,7 +69,7 @@ $font-sizes: (
   font-family: 'Nokora';
   font-style: normal;
   font-weight: 700;
-  src: url('/assets/fonts/nokora-v34-latin-700.woff2') format('woff2');
+  src: url('../../../public/assets/fonts/nokora-v34-latin-700.woff2') format('woff2');
 }
 
 /* Mulish — Default text */
@@ -83,7 +78,7 @@ $font-sizes: (
   font-family: 'Mulish';
   font-style: normal;
   font-weight: 400;
-  src: url('/assets/fonts/mulish-v18-latin-regular.woff2') format('woff2');
+  src: url('../../../public/assets/fonts/mulish-v18-latin-regular.woff2') format('woff2');
 }
 
 @font-face {
@@ -91,7 +86,7 @@ $font-sizes: (
   font-family: 'Mulish';
   font-style: normal;
   font-weight: 500;
-  src: url('/assets/fonts/mulish-v18-latin-500.woff2') format('woff2');
+  src: url('../../../public/assets/fonts/mulish-v18-latin-500.woff2') format('woff2');
 }
 
 @font-face {
@@ -99,7 +94,7 @@ $font-sizes: (
   font-family: 'Mulish';
   font-style: normal;
   font-weight: 600;
-  src: url('/assets/fonts/mulish-v18-latin-600.woff2') format('woff2');
+  src: url('../../../public/assets/fonts/mulish-v18-latin-600.woff2') format('woff2');
 }
 
 @font-face {
@@ -107,7 +102,7 @@ $font-sizes: (
   font-family: 'Mulish';
   font-style: normal;
   font-weight: 700;
-  src: url('/assets/fonts/mulish-v18-latin-700.woff2') format('woff2');
+  src: url('../../../public/assets/fonts/mulish-v18-latin-700.woff2') format('woff2');
 }
 
 @font-face {
@@ -115,5 +110,5 @@ $font-sizes: (
   font-family: 'Mulish';
   font-style: normal;
   font-weight: 800;
-  src: url('/assets/fonts/mulish-v18-latin-800.woff2') format('woff2');
+  src: url('../../../public/assets/fonts/mulish-v18-latin-800.woff2') format('woff2');
 }

@@ -34,10 +34,8 @@
   cursor: pointer;
   @include flex-space-btw;
   gap: 4px;
-
   font-family: var(--font-text-bold);
-  font-size: 14px;
-
+  font-size: 16px;
   transition:
     color 0.2s ease,
     border-color 0.2s ease;
@@ -50,7 +48,7 @@
 .create-survey__add-answer {
   @include flex-space-btw;
   width: 100%;
-  max-width: 340px;
+  max-width: 350px;
   margin: 8px 0;
   span {
     font-size: 14px;

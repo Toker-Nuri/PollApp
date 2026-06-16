@@ -31,7 +31,7 @@
     width: 0;
     height: 20px;
     margin-left: 0.5rem;
-    background: url('/assets/images/icons/add_circle.svg') no-repeat center;
+    background: url('../../../public/assets/images/icons/add_circle.svg') no-repeat center;
     background-size: contain;
     transition: width 0.2s ease;
   }
@@ -50,7 +50,7 @@
     width: 0;
     height: 18px;
     margin-left: 0.5rem;
-    background: url('/assets/images/icons/checkmark.svg') no-repeat center;
+    background: url('../../../public/assets/images/icons/checkmark.svg') no-repeat center;
     background-size: contain;
     transition: width 0.2s ease;
   }
@@ -70,7 +70,7 @@
     width: 0;
     height: 20px;
     margin-left: 0.5rem;
-    background: url('/assets/images/icons/checkmark.svg') no-repeat center;
+    background: url('../../../public/assets/images/icons/checkmark.svg') no-repeat center;
     background-size: contain;
     transition: width 0.2s ease;
   }

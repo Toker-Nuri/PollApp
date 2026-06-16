@@ -110,3 +110,63 @@
     width: 100%;
   }
 }
+
+// Thank-you overlay shown after submitting a vote
+.thankyou-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  padding: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  color: black;
+  font-family: var(--font-heading);
+  z-index: -1;
+
+  &--open {
+    opacity: 1;
+    pointer-events: auto;
+    @include flex-center;
+    z-index: 9999;
+  }
+
+  &__content {
+    background: #fee9d4;
+    width: 100%;
+    max-width: 480px;
+    border-radius: 0 55px 0 0;
+    padding: 40px;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(100%);
+    transition: transform 0.15s ease-out;
+    position: relative;
+    margin: 0 8px;
+  }
+
+  &--open &__content {
+    transform: translateY(0);
+  }
+
+  &__message {
+    font-size: 1.4rem;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  &__close-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: transparent;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+  }
+
+  &__close-icon {
+    width: 20px;
+    height: 20px;
+    display: block;
+  }
+}

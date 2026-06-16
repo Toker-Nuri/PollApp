@@ -40,7 +40,9 @@ export class SurveyPage {
   isPastSurvey: boolean = false;
   isCreateSurveyOpen: boolean = false;
   showResultsMobile: boolean = true;
-  userHasVoted:boolean = false;
+  userHasVoted: boolean = false;
+  isThankYouOverlayOpen: boolean = false;
+  private thankYouTimeout: ReturnType<typeof setTimeout> | null = null;
   // Stores selected answers in the voting process: questionId → optionIds[]
   answers = new Map<string, string[]>();
 
@@ -52,7 +54,7 @@ export class SurveyPage {
     await this.questionService.getQuestionsForSurvey(surveyId);
     await this.optionService.getOptionsForSurvey(surveyId);
     await this.voteService.getVotesForSurvey(surveyId);
-    this.userHasVoted = localStorage.getItem(`survey_voted_${surveyId}`) === "true";
+    this.userHasVoted = localStorage.getItem(`survey_voted_${surveyId}`) === 'true';
   }
 
   /**
@@ -132,7 +134,38 @@ export class SurveyPage {
     }
     const surveyId = this.route.snapshot.paramMap.get('id')!;
     localStorage.setItem(`survey_voted_${surveyId}`, 'true');
+    this.showThankYouAndRedirect();
+  }
+
+  /**
+   * Shows the thank-you overlay, then auto-closes it and
+   * redirects to the start page (no page reload).
+   */
+  private showThankYouAndRedirect() {
+    this.isThankYouOverlayOpen = true;
+    this.thankYouTimeout = setTimeout(() => this.closeThankYouOverlay(), 4000);
+  }
+
+  /**
+   * Closes the thank-you overlay and navigates to the start page.
+   * Can be triggered by the auto-close timer or the close button.
+   */
+  closeThankYouOverlay() {
+    if (this.thankYouTimeout) {
+      clearTimeout(this.thankYouTimeout);
+      this.thankYouTimeout = null;
+    }
+    this.isThankYouOverlayOpen = false;
     this.router.navigate(['/']);
+  }
+
+  /**
+   * Clears the pending auto-close timer when the component is destroyed.
+   */
+  ngOnDestroy() {
+    if (this.thankYouTimeout) {
+      clearTimeout(this.thankYouTimeout);
+    }
   }
 
   /**
