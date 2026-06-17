@@ -61,11 +61,13 @@ export class QuestionItem {
    * Adds new options to the `options` signal.
    */
   listenForOptionInserts() {
-    if (this.optionChannel) {
-      this.stopListeningForOptionInsert();
+    const channelName = `options-insert-${this.question().id}`;
+    const existing = supabase.getChannels().find((c) => c.topic === `realtime:${channelName}`);
+    if (existing) {
+      supabase.removeChannel(existing);
     }
     this.optionChannel = supabase
-      .channel(`options-insert-${this.question().id}`)
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
